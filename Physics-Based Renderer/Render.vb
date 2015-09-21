@@ -156,7 +156,27 @@
     End Function
     Public Function createVoxels(scene As scene3D) As List(Of voxel)
         Dim voxels As List(Of voxel) = {New voxel(500, 500, 500, 500), New voxel(500, 500, -500, 500), New voxel(-500, 500, 500, 500), New voxel(-500, 500, -500, 500), New voxel(500, -500, 500, 500), New voxel(500, -500, -500, 500), New voxel(-500, -500, 500, 500), New voxel(-500, -500, -500, 500)}.ToList
-
+        Dim allculled As Boolean
+        Do Until allculled
+            Dim notculledvoxels = voxels
+            For index = 0 To voxels.Count - 1
+                If voxels.Item(index).size = 0.1 Then
+                    notculledvoxels.Remove(voxels.Item(index))
+                End If
+            Next
+            allculled = (notculledvoxels.Count = 0)
+            Dim toSubdivide As New List(Of voxel)
+            For Each ittobject In scene.objects
+                For index = 0 To ittobject.faces.Count - 1
+                    For Each ittvoxel In notculledvoxels
+                        If AABB_TriIntersection.isIntersecting(ittobject, index + 1, ittvoxel) Then
+                            toSubdivide.Add(ittvoxel)
+                        End If
+                    Next
+                Next
+            Next
+            subdivideVoxels(toSubdivide)
+        Loop
         Return voxels
     End Function
     Public Function renderImage(scene As scene3D, voxels As List(Of voxel), xRes As Integer, yRes As Integer) As Object
@@ -166,8 +186,8 @@
     Public Function render(sceneInput As scene3D) As Object
         Dim scene As scene3D = sceneInput
         getNormals(scene)
-        Stop
         Dim voxels As List(Of voxel) = createVoxels(scene)
+        Stop
         Dim renderedImage(scene.camera.Xres, scene.camera.Yres) As List(Of splat)
         renderedImage = renderImage(scene, voxels, scene.camera.Xres, scene.camera.Yres)
         Return renderedImage
