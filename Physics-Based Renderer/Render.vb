@@ -144,10 +144,8 @@
     End Sub
     Function subdivideVoxels(voxels As List(Of voxel)) As List(Of voxel)
         Dim voxelSubdivisions As New List(Of verticy3D)({New verticy3D(0.5, 0.5, 0.5), New verticy3D(0.5, 0.5, -0.5), New verticy3D(0.5, -0.5, -0.5), New verticy3D(-0.5, -0.5, -0.5), New verticy3D(-0.5, 0.5, 0.5), New verticy3D(-0.5, -0.5, 0.5), New verticy3D(0.5, -0.5, -0.5), New verticy3D(-0.5, 0.5, -0.5)}.ToList)
-        Dim returnVoxels = voxels
-        Dim forVoxels = voxels
-        For Each inputVoxel In forVoxels
-            returnVoxels.Remove(inputVoxel)
+        Dim returnVoxels As New List(Of voxel)
+        For Each inputVoxel In voxels
             For i = 0 To 7
                 returnVoxels.Add(New voxel(voxelSubdivisions(i).X * inputVoxel.size + inputVoxel.Xpos, voxelSubdivisions(i).Y * inputVoxel.size + inputVoxel.Ypos, voxelSubdivisions(i).Z * inputVoxel.size + inputVoxel.Zpos, inputVoxel.size / 2))
             Next
@@ -175,7 +173,7 @@
                     Next
                 Next
             Next
-            subdivideVoxels(toSubdivide)
+            notculledvoxels = subdivideVoxels(toSubdivide)
         Loop
         Return voxels
     End Function
