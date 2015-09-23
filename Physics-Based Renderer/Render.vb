@@ -144,10 +144,8 @@
     End Sub
     Function subdivideVoxels(voxels As List(Of voxel)) As List(Of voxel)
         Dim voxelSubdivisions As New List(Of verticy3D)({New verticy3D(0.5, 0.5, 0.5), New verticy3D(0.5, 0.5, -0.5), New verticy3D(0.5, -0.5, -0.5), New verticy3D(-0.5, -0.5, -0.5), New verticy3D(-0.5, 0.5, 0.5), New verticy3D(-0.5, -0.5, 0.5), New verticy3D(0.5, -0.5, -0.5), New verticy3D(-0.5, 0.5, -0.5)}.ToList)
-        Dim returnVoxels = voxels
-        Dim forVoxels = voxels
-        For Each inputVoxel In forVoxels
-            returnVoxels.Remove(inputVoxel)
+        Dim returnVoxels As New List(Of voxel)
+        For Each inputVoxel In voxels
             For i = 0 To 7
                 returnVoxels.Add(New voxel(voxelSubdivisions(i).X * inputVoxel.size + inputVoxel.Xpos, voxelSubdivisions(i).Y * inputVoxel.size + inputVoxel.Ypos, voxelSubdivisions(i).Z * inputVoxel.size + inputVoxel.Zpos, inputVoxel.size / 2))
             Next
@@ -156,7 +154,27 @@
     End Function
     Public Function createVoxels(scene As scene3D) As List(Of voxel)
         Dim voxels As List(Of voxel) = {New voxel(500, 500, 500, 500), New voxel(500, 500, -500, 500), New voxel(-500, 500, 500, 500), New voxel(-500, 500, -500, 500), New voxel(500, -500, 500, 500), New voxel(500, -500, -500, 500), New voxel(-500, -500, 500, 500), New voxel(-500, -500, -500, 500)}.ToList
-
+        Dim allculled As Boolean
+        Do Until allculled
+            Dim notculledvoxels = voxels
+            For index = 0 To voxels.Count - 1
+                If voxels.Item(index).size = 0.1 Then
+                    notculledvoxels.Remove(voxels.Item(index))
+                End If
+            Next
+            allculled = (notculledvoxels.Count = 0)
+            Dim toSubdivide As New List(Of voxel)
+            For Each ittobject In scene.objects
+                For index = 0 To ittobject.faces.Count - 1
+                    For Each ittvoxel In notculledvoxels
+                        If AABB_TriIntersection.isIntersecting(ittobject, index + 1, ittvoxel) Then
+                            toSubdivide.Add(ittvoxel)
+                        End If
+                    Next
+                Next
+            Next
+            notculledvoxels = subdivideVoxels(toSubdivide)
+        Loop
         Return voxels
     End Function
     Public Function renderImage(scene As scene3D, voxels As List(Of voxel), xRes As Integer, yRes As Integer) As Object
@@ -166,8 +184,8 @@
     Public Function render(sceneInput As scene3D) As Object
         Dim scene As scene3D = sceneInput
         getNormals(scene)
-        Stop
         Dim voxels As List(Of voxel) = createVoxels(scene)
+        Stop
         Dim renderedImage(scene.camera.Xres, scene.camera.Yres) As List(Of splat)
         renderedImage = renderImage(scene, voxels, scene.camera.Xres, scene.camera.Yres)
         Return renderedImage
