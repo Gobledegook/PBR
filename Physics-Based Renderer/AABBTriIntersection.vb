@@ -1,8 +1,8 @@
 ﻿Imports Physics_Based_Renderer.Render
 Public Module AABB_TriIntersection
-    Dim X = 0
-    Dim Y = 1
-    Dim Z = 2
+    Dim X As Integer = 0
+    Dim Y As Integer = 1
+    Dim Z As Integer = 2
     Function crossProduct(ByVal vector1 As Render.vector3D, ByVal vector2 As Render.vector3D) As Render.vector3D
         Return New Render.vector3D(vector1.Y * vector2.Z - vector1.Z * vector2.Y, vector1.Z * vector2.X - vector1.X * vector2.Z, vector1.X * vector2.Y - vector1.Y * vector2.X)
     End Function
@@ -68,9 +68,17 @@ Public Module AABB_TriIntersection
     Function AabbTriangleIntersectionTest(ByVal inObject As object3D, ByVal faceNum As Integer, ByVal voxel As voxel)
         Dim normalVector = inObject.faces(faceNum - 1).normal
         Dim normalArray = {normalVector.X, normalVector.Y, normalVector.Z}
-        'Dim 
+        Dim vertArray = {inObject.verts(inObject.faces(faceNum))}
     End Function
-    Function planeBoxOverlap(ByRef normal() As Double, ByRef vert() As Double, ByVal maxbox() As Double) As Integer
-
+    Function planeBoxOverlap(ByRef normal() As Double, ByRef vert(,) As Double, ByVal maxbox() As Double) As Integer
+        Dim q As Integer = X
+        Dim vmin(2), vmax(2), v(2) As Double
+        Do Until q = Z
+            v = {vert(0, q), vert(1, q), vert(2, q)}
+            If normal(q) > 0 Then
+                vmin(q) = (vmin(q) - maxbox(q)) - v
+            End If
+            q += 1
+        Loop
     End Function
 End Module
